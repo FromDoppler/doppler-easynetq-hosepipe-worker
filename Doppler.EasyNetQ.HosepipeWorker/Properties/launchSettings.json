@@ -1,9 +1,12 @@
 {
   "profiles": {
     "Doppler.EasyNetQ.HosepipeWorker": {
-      "commandName": "Project"
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
     },
-    "Docker (1)": {
+    "Docker": {
       "commandName": "Docker"
     }
   }
