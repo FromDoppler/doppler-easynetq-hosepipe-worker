@@ -1,4 +1,4 @@
-
+﻿
 namespace Doppler.EasyNetQ.HosepipeWorker
 {
     public class Program
