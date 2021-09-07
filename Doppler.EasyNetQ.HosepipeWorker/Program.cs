@@ -1,4 +1,4 @@
-using Doppler.Extensions.Logging;
+﻿using Doppler.Extensions.Logging;
 using EasyNetQ.Consumer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
