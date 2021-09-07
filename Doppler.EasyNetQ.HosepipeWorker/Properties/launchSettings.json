@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Doppler.EasyNetQ.HosepipeWorker": {
+      "commandName": "Project"
+    },
+    "Docker (1)": {
+      "commandName": "Docker"
+    }
+  }
+}
