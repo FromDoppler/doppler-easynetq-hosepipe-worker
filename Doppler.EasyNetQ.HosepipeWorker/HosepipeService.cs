@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Doppler.Extensions.Logging;
 using EasyNetQ.Consumer;
 using EasyNetQ.SystemMessages;
 using EasyNetQ.Topology;
@@ -29,6 +30,13 @@ namespace Doppler.EasyNetQ.HosepipeWorker
             _hosepipeSettings = options.Value;
 
             _busStation = busStation;
+        }
+
+        public override async Task StartAsync(CancellationToken cancellationToken)
+        {
+            _logger.LogServiceStart(this);
+
+            await base.StartAsync(cancellationToken);
         }
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
@@ -77,6 +85,13 @@ namespace Doppler.EasyNetQ.HosepipeWorker
                     await RepublishErrorAsync(service.Name, errorMessage);
                 }
             }
+        }
+
+        public override async Task StopAsync(CancellationToken cancellationToken)
+        {
+            _logger.LogServiceStop(this);
+
+            await base.StopAsync(cancellationToken);
         }
 
         public List<Error> GetErrorsFromQueue(string service)
