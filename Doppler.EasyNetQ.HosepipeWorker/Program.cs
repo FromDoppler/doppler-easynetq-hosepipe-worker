@@ -16,6 +16,10 @@ namespace Doppler.EasyNetQ.HosepipeWorker
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
+                .ConfigureAppConfiguration(config =>
+                {
+                    config.AddJsonFile("/run/secrets/appsettings.Secret.json", true);
+                })
                 .UseSerilog((hostContext, loggerConfiguration) =>
                 {
                     loggerConfiguration.SetupSeriLog(hostContext.Configuration, hostContext.HostingEnvironment);
