@@ -1,6 +1,4 @@
-﻿
-using EasyNetQ.Consumer;
-using Microsoft.Extensions.Configuration;
+﻿using EasyNetQ.Consumer;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
