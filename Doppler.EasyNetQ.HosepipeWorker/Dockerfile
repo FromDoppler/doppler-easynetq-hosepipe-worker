@@ -6,6 +6,7 @@ WORKDIR /app
 FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
 WORKDIR /src
 COPY ["Doppler.EasyNetQ.HosepipeWorker/Doppler.EasyNetQ.HosepipeWorker.csproj", "Doppler.EasyNetQ.HosepipeWorker/"]
+COPY ["Doppler.Extensions.Logging/Doppler.Extensions.Logging.csproj", "Doppler.Extensions.Logging/"]
 RUN dotnet restore "Doppler.EasyNetQ.HosepipeWorker/Doppler.EasyNetQ.HosepipeWorker.csproj"
 COPY . .
 WORKDIR "/src/Doppler.EasyNetQ.HosepipeWorker"
