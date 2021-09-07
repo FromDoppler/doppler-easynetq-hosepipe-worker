@@ -16,6 +16,52 @@ pipeline {
                 sh 'docker build --target test .'
             }
         }
+        stage('Delivery docker images') {
+            when { 
+                anyOf { 
+                    branch 'main'
+                    branch 'INT'
+                    buildingTag()
+                }
+            }
+            environment {
+                DOCKER_NAMESPACE = 'dopplerdock'
+                FULL_VERSION = "${BRANCH_NAME}-commit-${GIT_COMMIT}"
+            }
+            steps {
+                withDockerRegistry([ credentialsId: "dockerhub_${DOCKER_NAMESPACE}", url: ""]) {
+                    sh 'env VERSION=${BRANCH_NAME} docker-compose build'
+                    sh 'env VERSION=${BRANCH_NAME} docker-compose push'
+                    sh 'docker-compose build'
+                    sh 'docker-compose push'
+                }
+            }
+        }
+
+        stage('Delivery semver docker images') {
+            when {
+                expression {
+                    return isVersionTag(readCurrentTag())
+                }
+            }
+            environment {
+                DOCKER_NAMESPACE = 'dopplerdock'
+                SEMVER_MAYOR = "${env.BRANCH_NAME.tokenize('.')[0]}"
+                SEMVER_MAYOR_MINOR = "${SEMVER_MAYOR}.${env.BRANCH_NAME.tokenize('.')[1]}"
+                SEMVER_MAYOR_MINOR_PATCH = "${SEMVER_MAYOR_MINOR}.${env.BRANCH_NAME.tokenize('.')[2]}"
+                FULL_VERSION = "${BRANCH_NAME}-commit-${GIT_COMMIT}"
+            }
+            steps {
+                withDockerRegistry([ credentialsId: "dockerhub_${DOCKER_NAMESPACE}", url: ""]) {
+                    sh 'env VERSION=${SEMVER_MAYOR} docker-compose build'
+                    sh 'env VERSION=${SEMVER_MAYOR} docker-compose push'
+                    sh 'env VERSION=${SEMVER_MAYOR_MINOR} docker-compose build'
+                    sh 'env VERSION=${SEMVER_MAYOR_MINOR} docker-compose push'
+                    sh 'env VERSION=${SEMVER_MAYOR_MINOR_PATCH} docker-compose build'
+                    sh 'env VERSION=${SEMVER_MAYOR_MINOR_PATCH} docker-compose push'
+                }
+            }
+        }
     }
     post { 
         cleanup {

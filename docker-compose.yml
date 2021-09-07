@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  hosepipeworker:
+    image: ${DOCKER_REGISTRY-}${DOCKER_NAMESPACE:-dopplerdock}/doppler-easynetq-hosepipeworker:${VERSION:-latest}
+    build:
+      context: .
+      dockerfile: Doppler.EasyNetQ.HosepipeWorker/Dockerfile
+      args: 
+        version: ${FULL_VERSION}
