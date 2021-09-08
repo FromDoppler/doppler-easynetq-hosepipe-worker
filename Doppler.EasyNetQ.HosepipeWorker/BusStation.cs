@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using EasyNetQ;
+using EasyNetQ.ConnectionString;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -17,7 +18,12 @@ namespace Doppler.EasyNetQ.HosepipeWorker
 
             foreach (var connection in options.Value.Connections)
             {
-                var bus = RabbitHutch.CreateBus(connection.ConnectionString, x => { });
+                var connectionConfiguration = new ConnectionStringParser().Parse(connection.ConnectionString);
+                if (!string.IsNullOrWhiteSpace(connection.Password))
+                {
+                    connectionConfiguration.Password = connection.Password;
+                }
+                var bus = RabbitHutch.CreateBus(connectionConfiguration, x => { });
 
                 TryAddBus(connection.Name, bus);
             }
