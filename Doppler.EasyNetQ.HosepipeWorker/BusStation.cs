@@ -18,14 +18,21 @@ namespace Doppler.EasyNetQ.HosepipeWorker
 
             foreach (var connection in options.Value.Connections)
             {
-                var connectionConfiguration = new ConnectionStringParser().Parse(connection.ConnectionString);
-                if (!string.IsNullOrWhiteSpace(connection.Password))
+                try
                 {
-                    connectionConfiguration.Password = connection.Password;
-                }
-                var bus = RabbitHutch.CreateBus(connectionConfiguration, x => { });
+                    var connectionConfiguration = new ConnectionStringParser().Parse(connection.ConnectionString);
+                    if (!string.IsNullOrWhiteSpace(connection.Password))
+                    {
+                        connectionConfiguration.Password = connection.Password;
+                    }
+                    var bus = RabbitHutch.CreateBus(connectionConfiguration, x => { });
 
-                TryAddBus(connection.Name, bus);
+                    TryAddBus(connection.Name, bus);
+                }
+                catch (EasyNetQException ex)
+                {
+                    _logger.LogError(ex, "Can create connection bus for service {BusName}", connection.Name);
+                }
             }
         }
 
