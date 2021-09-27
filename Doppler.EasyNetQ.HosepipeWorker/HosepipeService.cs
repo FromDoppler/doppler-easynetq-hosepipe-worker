@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Doppler.Extensions.Logging;
@@ -140,6 +141,21 @@ namespace Doppler.EasyNetQ.HosepipeWorker
             catch (OperationInterruptedException)
             {
                 _logger.LogError("The exchange, '{Exchange}', described in the error message does not exist.'", error.Exchange);
+            }
+            catch (Exception ex)
+            {
+                try
+                {
+                    await _busStation.GetBus(service).PublishAsync(error, configure => configure.WithQueueName(_hosepipeSettings.ErrorQueueName));
+                    _logger.LogWarning(ex, "Unexpected problem publishing message to the original queue, error message was published again to retry later");
+                }
+                catch (Exception republishErrorException)
+                {
+                    _logger.LogError(
+                        republishErrorException,
+                        "Unexpected problem republishing message error to the error queue, the message was lost. @{ErrorMessage}",
+                        error);
+                }
             }
         }
     }
