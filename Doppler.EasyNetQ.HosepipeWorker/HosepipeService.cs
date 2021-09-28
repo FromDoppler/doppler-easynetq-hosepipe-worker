@@ -131,6 +131,8 @@ namespace Doppler.EasyNetQ.HosepipeWorker
 
                 if (retryCountValue > _hosepipeSettings.MaxRetryCount)
                 {
+                    _logger.LogWarning("Max retry reached");
+
                     await _busStation.GetBus(service).Advanced.PublishAsync(
                         exchange: Exchange.GetDefault(),
                         routingKey: _hosepipeSettings.UnsolvedErrorQueueName,
@@ -138,7 +140,7 @@ namespace Doppler.EasyNetQ.HosepipeWorker
                         messageProperties: error.BasicProperties,
                         body: new JsonSerializer().MessageToBytes(typeof(Error), error));
 
-                    _logger.LogInformation("Max retry reached, error published to {QueueName}", _hosepipeSettings.UnsolvedErrorQueueName);
+                    _logger.LogInformation("Error published to {QueueName}", _hosepipeSettings.UnsolvedErrorQueueName);
 
                     return;
                 }
@@ -155,6 +157,8 @@ namespace Doppler.EasyNetQ.HosepipeWorker
             {
                 try
                 {
+                    _logger.LogError(ex, "Unexpected problem publishing message to the original queue");
+
                     await _busStation.GetBus(service).Advanced.PublishAsync(
                         exchange: Exchange.GetDefault(),
                         routingKey: _hosepipeSettings.UnsolvedErrorQueueName,
@@ -162,7 +166,7 @@ namespace Doppler.EasyNetQ.HosepipeWorker
                         messageProperties: error.BasicProperties,
                         body: new JsonSerializer().MessageToBytes(typeof(Error), error));
 
-                    _logger.LogError(ex, "Unexpected problem publishing message to the original queue, error published to {QueueName}", _hosepipeSettings.UnsolvedErrorQueueName);
+                    _logger.LogInformation("Error published to {QueueName}", _hosepipeSettings.UnsolvedErrorQueueName);
                 }
                 catch (Exception republishErrorException)
                 {
