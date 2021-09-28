@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Doppler.Extensions.Logging;
+using EasyNetQ;
 using EasyNetQ.Consumer;
 using EasyNetQ.SystemMessages;
 using EasyNetQ.Topology;
@@ -130,7 +131,12 @@ namespace Doppler.EasyNetQ.HosepipeWorker
 
                 if (retryCountValue > _hosepipeSettings.MaxRetryCount)
                 {
-                    await _busStation.GetBus(service).PublishAsync(error, configure => configure.WithQueueName(_hosepipeSettings.UnsolvedErrorQueueName));
+                    await _busStation.GetBus(service).Advanced.PublishAsync(
+                        exchange: Exchange.GetDefault(),
+                        routingKey: _hosepipeSettings.UnsolvedErrorQueueName,
+                        mandatory: true,
+                        messageProperties: error.BasicProperties,
+                        body: new JsonSerializer().MessageToBytes(typeof(Error), error));
 
                     _logger.LogInformation("Max retry reached, error published to {QueueName}", _hosepipeSettings.UnsolvedErrorQueueName);
 
@@ -149,14 +155,20 @@ namespace Doppler.EasyNetQ.HosepipeWorker
             {
                 try
                 {
-                    await _busStation.GetBus(service).PublishAsync(error, configure => configure.WithQueueName(_hosepipeSettings.UnsolvedErrorQueueName));
-                    _logger.LogError(ex, "Unexpected problem publishing message to the original queue, error message was published to unsolved error queue");
+                    await _busStation.GetBus(service).Advanced.PublishAsync(
+                        exchange: Exchange.GetDefault(),
+                        routingKey: _hosepipeSettings.UnsolvedErrorQueueName,
+                        mandatory: true,
+                        messageProperties: error.BasicProperties,
+                        body: new JsonSerializer().MessageToBytes(typeof(Error), error));
+
+                    _logger.LogError(ex, "Unexpected problem publishing message to the original queue, error published to {QueueName}", _hosepipeSettings.UnsolvedErrorQueueName);
                 }
                 catch (Exception republishErrorException)
                 {
                     _logger.LogError(
                         republishErrorException,
-                        "Unexpected problem publishing message error to the unsolved error queue, the message was lost. @{ErrorMessage}",
+                        "Unexpected problem publishing message error to the unsolved error queue, message discarted. @{ErrorMessage}",
                         error);
                 }
             }
