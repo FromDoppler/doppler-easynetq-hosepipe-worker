@@ -123,9 +123,9 @@ namespace Doppler.EasyNetQ.HosepipeWorker
                     error.BasicProperties.Headers.Add(_hosepipeSettings.RetryCountHeader, retryCount);
                 }
 
-                error.BasicProperties.Headers[_hosepipeSettings.RetryCountHeader] = (long)retryCount + 1;
+                error.BasicProperties.Headers[_hosepipeSettings.RetryCountHeader] = (int)retryCount + 1;
 
-                if ((long)error.BasicProperties.Headers[_hosepipeSettings.RetryCountHeader] > _hosepipeSettings.MaxRetryCount)
+                if ((int)error.BasicProperties.Headers[_hosepipeSettings.RetryCountHeader] > _hosepipeSettings.MaxRetryCount)
                 {
                     await _busStation.GetBus(service).PublishAsync(error, configure => configure.WithQueueName(_hosepipeSettings.UnsolvedErrorQueueName));
 
