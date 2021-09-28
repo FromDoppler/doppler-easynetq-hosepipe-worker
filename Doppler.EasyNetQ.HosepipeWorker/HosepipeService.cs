@@ -124,7 +124,7 @@ namespace Doppler.EasyNetQ.HosepipeWorker
                     error.BasicProperties.Headers.Add(_hosepipeSettings.RetryCountHeader, retryCount);
                 }
 
-                var retryCountValue = retryCount as int? ?? 0;
+                var retryCountValue = retryCount as int? ?? retryCount as long? ?? 0;
                 retryCountValue++;
 
                 error.BasicProperties.Headers[_hosepipeSettings.RetryCountHeader] = retryCountValue;
