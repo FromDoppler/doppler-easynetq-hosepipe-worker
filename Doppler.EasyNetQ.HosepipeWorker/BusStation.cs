@@ -27,6 +27,9 @@ namespace Doppler.EasyNetQ.HosepipeWorker
                     }
                     var bus = RabbitHutch.CreateBus(connectionConfiguration, x => { });
 
+                    bus.Advanced.QueueDeclare(options.Value.ErrorQueueName);
+                    bus.Advanced.QueueDeclare(options.Value.UnsolvedErrorQueueName);
+
                     TryAddBus(connection.Name, bus);
                 }
                 catch (EasyNetQException ex)
