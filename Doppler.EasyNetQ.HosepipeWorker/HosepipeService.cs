@@ -123,9 +123,9 @@ namespace Doppler.EasyNetQ.HosepipeWorker
                     error.BasicProperties.Headers.Add(_hosepipeSettings.RetryCountHeader, retryCount);
                 }
 
-                error.BasicProperties.Headers[_hosepipeSettings.RetryCountHeader] = (int)retryCount + 1;
+                error.BasicProperties.Headers[_hosepipeSettings.RetryCountHeader] = (long)retryCount + 1;
 
-                if ((int)error.BasicProperties.Headers[_hosepipeSettings.RetryCountHeader] > _hosepipeSettings.MaxRetryCount)
+                if ((long)error.BasicProperties.Headers[_hosepipeSettings.RetryCountHeader] > _hosepipeSettings.MaxRetryCount)
                 {
                     await _busStation.GetBus(service).PublishAsync(error, configure => configure.WithQueueName(_hosepipeSettings.UnsolvedErrorQueueName));
 
@@ -146,14 +146,14 @@ namespace Doppler.EasyNetQ.HosepipeWorker
             {
                 try
                 {
-                    await _busStation.GetBus(service).PublishAsync(error, configure => configure.WithQueueName(_hosepipeSettings.ErrorQueueName));
-                    _logger.LogWarning(ex, "Unexpected problem publishing message to the original queue, error message was published again to retry later");
+                    await _busStation.GetBus(service).PublishAsync(error, configure => configure.WithQueueName(_hosepipeSettings.UnsolvedErrorQueueName));
+                    _logger.LogError(ex, "Unexpected problem publishing message to the original queue, error message was published to unsolved error queue");
                 }
                 catch (Exception republishErrorException)
                 {
                     _logger.LogError(
                         republishErrorException,
-                        "Unexpected problem republishing message error to the error queue, the message was lost. @{ErrorMessage}",
+                        "Unexpected problem publishing message error to the unsolved error queue, the message was lost. @{ErrorMessage}",
                         error);
                 }
             }
