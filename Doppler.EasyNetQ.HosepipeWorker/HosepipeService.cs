@@ -130,6 +130,16 @@ namespace Doppler.EasyNetQ.HosepipeWorker
 
                 error.BasicProperties.Headers[_hosepipeSettings.RetryCountHeader] = retryCountValue;
 
+                var body = _errorMessageSerializer.Deserialize(error.Message);
+
+                var errorInsideError = (Error)new JsonSerializer().BytesToMessage(typeof(Error), body);
+                if (errorInsideError?.Message != null)
+                {
+                    _logger.LogWarning("Detected error inside error");
+                    await RepublishErrorAsync(service, errorInsideError);
+                    return;
+                }
+
                 if (retryCountValue > _hosepipeSettings.MaxRetryCount)
                 {
                     _logger.LogWarning("Max retry reached");
@@ -145,8 +155,6 @@ namespace Doppler.EasyNetQ.HosepipeWorker
 
                     return;
                 }
-
-                var body = _errorMessageSerializer.Deserialize(error.Message);
 
                 await _busStation.GetBus(service).Advanced.PublishAsync(new Exchange(error.Exchange), error.RoutingKey, mandatory: true, error.BasicProperties, body);
             }
