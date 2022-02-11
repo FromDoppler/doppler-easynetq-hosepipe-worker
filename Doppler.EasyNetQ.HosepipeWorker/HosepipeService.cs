@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Doppler.Extensions.Logging;
@@ -64,7 +65,7 @@ namespace Doppler.EasyNetQ.HosepipeWorker
             foreach (var service in _hosepipeSettings.Connections)
             {
                 var bus = _busStation.GetBus(service.Name);
-                bus.SubscribeAsync<Error>(
+                bus.PubSub.SubscribeAsync<Error>(
                     subscriptionId: string.Empty,
                     onMessage: async (error) => await RepublishErrorAsync(service.Name, error),
                     configure: (c) => c.WithQueueName(_hosepipeSettings.ErrorQueueName)
@@ -80,7 +81,7 @@ namespace Doppler.EasyNetQ.HosepipeWorker
             {
                 _logger.LogInformation("Consuming errores from queue {QueueName} of service {Service}", _hosepipeSettings.ErrorQueueName, service.Name);
 
-                var errorMessages = GetErrorsFromQueue(service.Name);
+                var errorMessages = await GetErrorsFromQueue(service.Name);
 
                 foreach (var errorMessage in errorMessages)
                 {
@@ -96,18 +97,12 @@ namespace Doppler.EasyNetQ.HosepipeWorker
             await base.StopAsync(cancellationToken);
         }
 
-        public List<Error> GetErrorsFromQueue(string service)
+        public async Task<IList<Error>> GetErrorsFromQueue(string service)
         {
-            var errorList = new List<Error>();
+            var pullingConsumer = _busStation.GetBus(service).Advanced.CreatePullingConsumer<Error>(new Queue(_hosepipeSettings.ErrorQueueName, isExclusive: false));
 
-            while (errorList.Count < _hosepipeSettings.NumberOfMessagesToRetrieve)
-            {
-                var errorMessage = _busStation.GetBus(service).Advanced.Get<Error>(new Queue(_hosepipeSettings.ErrorQueueName, isExclusive: false));
-
-                if (errorMessage == null) break; // no more messages on the queue
-
-                errorList.Add(errorMessage.Message.Body);
-            }
+            var pullBatchResult = await pullingConsumer.PullBatchAsync(_hosepipeSettings.NumberOfMessagesToRetrieve);
+            var errorList = pullBatchResult.Messages.Select(x => x.Message.Body).ToList();
 
             _logger.LogInformation("{Amount} error messages consumed and republished", errorList.Count);
 
@@ -122,7 +117,6 @@ namespace Doppler.EasyNetQ.HosepipeWorker
                 {
                     retryCount = 0;
                     error.BasicProperties.Headers.Add(_hosepipeSettings.RetryCountHeader, retryCount);
-                    error.BasicProperties.HeadersPresent = true;
                 }
 
                 var retryCountValue = retryCount as int? ?? retryCount as long? ?? 0;
