@@ -158,10 +158,6 @@ namespace Doppler.EasyNetQ.HosepipeWorker
 
                 await _busStation.GetBus(service).Advanced.PublishAsync(new Exchange(error.Exchange), error.RoutingKey, mandatory: true, error.BasicProperties, body);
             }
-            catch (OperationInterruptedException)
-            {
-                _logger.LogError("The exchange, '{Exchange}', described in the error message does not exist.'", error.Exchange);
-            }
             catch (Exception ex)
             {
                 try
