@@ -24,7 +24,7 @@ jobs:
     - name: Restore tools
       run: dotnet tool restore
     - name: Verify code format
-      run: dotnet dotnet-format --check
+      run: dotnet format --verify-no-changes
     - name: Build with dotnet
       run: dotnet build --configuration Release
     - name: Test with dotnet

@@ -11,7 +11,7 @@ RUN dotnet restore
 FROM restore AS build
 WORKDIR .
 COPY . .
-RUN dotnet dotnet-format --check
+RUN dotnet format --verify-no-changes
 RUN dotnet build -c Release
 
 FROM build AS test
