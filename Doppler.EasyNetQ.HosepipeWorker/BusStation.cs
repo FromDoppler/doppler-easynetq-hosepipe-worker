@@ -9,7 +9,7 @@ namespace Doppler.EasyNetQ.HosepipeWorker
     public class BusStation : IBusStation
     {
         private readonly ILogger<BusStation> _logger;
-        private readonly Dictionary<string, IBus> _buses;
+        private readonly IDictionary<string, IBus> _buses;
 
         public BusStation(ILogger<BusStation> logger, IOptions<HosepipeSettings> options)
         {
@@ -20,21 +20,21 @@ namespace Doppler.EasyNetQ.HosepipeWorker
             {
                 try
                 {
-                    var connectionConfiguration = new ConnectionStringParser().Parse(connection.ConnectionString);
-                    if (!string.IsNullOrWhiteSpace(connection.Password))
+                    var connectionConfiguration = new ConnectionStringParser().Parse(connection.Value.ConnectionString);
+                    if (!string.IsNullOrWhiteSpace(connection.Value.Password))
                     {
-                        connectionConfiguration.Password = connection.Password;
+                        connectionConfiguration.Password = connection.Value.Password;
                     }
                     var bus = RabbitHutch.CreateBus(connectionConfiguration, x => { });
 
                     bus.Advanced.QueueDeclare(options.Value.ErrorQueueName);
                     bus.Advanced.QueueDeclare(options.Value.UnsolvedErrorQueueName);
 
-                    TryAddBus(connection.Name, bus);
+                    TryAddBus(connection.Key, bus);
                 }
                 catch (EasyNetQException ex)
                 {
-                    _logger.LogError(ex, "Can create connection bus for service {BusName}", connection.Name);
+                    _logger.LogError(ex, "Can create connection bus for service {BusName}", connection.Key);
                 }
             }
         }
