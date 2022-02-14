@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:5.0 AS restore
+FROM mcr.microsoft.com/dotnet/sdk:6.0.102 AS restore
 WORKDIR .
 
 COPY ./*.sln ./
@@ -11,7 +11,7 @@ RUN dotnet restore
 FROM restore AS build
 WORKDIR .
 COPY . .
-RUN dotnet dotnet-format --check
+RUN dotnet format --verify-no-changes
 RUN dotnet build -c Release
 
 FROM build AS test
