@@ -21,9 +21,9 @@ namespace Doppler.EasyNetQ.HosepipeWorker
                 try
                 {
                     var connectionConfiguration = new ConnectionStringParser().Parse(connection.Value.ConnectionString);
-                    if (!string.IsNullOrWhiteSpace(connection.Value.Password))
+                    if (!string.IsNullOrWhiteSpace(connection.Value.SecretPassword))
                     {
-                        connectionConfiguration.Password = connection.Value.Password;
+                        connectionConfiguration.Password = connection.Value.SecretPassword;
                     }
                     var bus = RabbitHutch.CreateBus(connectionConfiguration, x => { });
 

@@ -27,6 +27,6 @@ namespace Doppler.EasyNetQ.HosepipeWorker
         /// The secret password of the user indicate in the <see cref="ConnectionString"/>
         /// </summary>
         /// <remarks>If ConnectionString has defined password parameter, will be replaced with this value if it is not empty.</remarks>
-        public string Password { get; set; }
+        public string SecretPassword { get; set; }
     }
 }
