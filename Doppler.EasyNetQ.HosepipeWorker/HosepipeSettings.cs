@@ -4,7 +4,7 @@ namespace Doppler.EasyNetQ.HosepipeWorker
 {
     public class HosepipeSettings
     {
-        public List<Connections> Connections { get; set; }
+        public IDictionary<string, Connection> Connections { get; set; }
         public string ErrorQueueName { get; set; } = "EasyNetQ_Default_Error_Queue";
         public string UnsolvedErrorQueueName { get; set; } = "EasyNetQ_Unsolved_Error_Queue";
         public string RetryCountHeader { get; set; } = "RetryCount";
@@ -20,9 +20,8 @@ namespace Doppler.EasyNetQ.HosepipeWorker
         Subscribe,
     }
 
-    public class Connections
+    public class Connection
     {
-        public string Name { get; set; }
         public string ConnectionString { get; set; }
         /// <summary>
         /// The secret password of the user indicate in the <see cref="ConnectionString"/>

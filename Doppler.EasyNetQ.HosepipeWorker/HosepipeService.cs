@@ -64,14 +64,14 @@ namespace Doppler.EasyNetQ.HosepipeWorker
         {
             foreach (var service in _hosepipeSettings.Connections)
             {
-                var bus = _busStation.GetBus(service.Name);
+                var bus = _busStation.GetBus(service.Key);
                 bus.PubSub.SubscribeAsync<Error>(
                     subscriptionId: string.Empty,
-                    onMessage: async (error) => await RepublishErrorAsync(service.Name, error),
+                    onMessage: async (error) => await RepublishErrorAsync(service.Key, error),
                     configure: (c) => c.WithQueueName(_hosepipeSettings.ErrorQueueName)
                     );
 
-                _logger.LogInformation("Subscribe to queue {QueueName} of service {Service}", _hosepipeSettings.ErrorQueueName, service.Name);
+                _logger.LogInformation("Subscribe to queue {QueueName} of service {Service}", _hosepipeSettings.ErrorQueueName, service.Key);
             }
         }
 
@@ -79,13 +79,13 @@ namespace Doppler.EasyNetQ.HosepipeWorker
         {
             foreach (var service in _hosepipeSettings.Connections)
             {
-                _logger.LogInformation("Consuming errores from queue {QueueName} of service {Service}", _hosepipeSettings.ErrorQueueName, service.Name);
+                _logger.LogInformation("Consuming errores from queue {QueueName} of service {Service}", _hosepipeSettings.ErrorQueueName, service.Key);
 
-                var errorMessages = await GetErrorsFromQueue(service.Name);
+                var errorMessages = await GetErrorsFromQueue(service.Key);
 
                 foreach (var errorMessage in errorMessages)
                 {
-                    await RepublishErrorAsync(service.Name, errorMessage);
+                    await RepublishErrorAsync(service.Key, errorMessage);
                 }
             }
         }
