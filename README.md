@@ -19,7 +19,7 @@ Worker to republish messages that caused an error being processed by a consumer
       },
       "example-2": {
         "ConnectionString": "host=example-server;virtualHost=example-virtual;username=guest"
-        "Password": "someSecretPassword",
+        "SecretPassword": "someSecretPassword",
       },
     }
   }
@@ -31,5 +31,5 @@ Worker to republish messages that caused an error being processed by a consumer
 "HosepipeSettings__Connections__localhost__ConnectionString": "host=localhost"
 "HosepipeSettings__Connections__example-1__ConnectionString": "host=example-server;virtualHost=example-virtual;username=guest;password=guest"
 "HosepipeSettings__Connections__example-2__ConnectionString": "host=example-server;virtualHost=example-virtual;username=guest"
-"HosepipeSettings__Connections__example-2__Password": "someSecretPassword"
+"HosepipeSettings__Connections__example-2__SecretPassword": "someSecretPassword"
 ```
