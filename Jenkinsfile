@@ -90,5 +90,5 @@ def boolean isVersionTag(String tag) {
 // workaround https://issues.jenkins-ci.org/browse/JENKINS-55987
 // TODO: read this value from Jenkins provided metadata
 def String readCurrentTag() {
-    return sh(returnStdout: true, script: "git describe --tags --match v?*.?*.?* --abbrev=0 --exact-match || echo ''").trim()
+    return sh(returnStdout: true, script: 'echo ${TAG_NAME}').trim()
 }
