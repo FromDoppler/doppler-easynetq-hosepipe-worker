@@ -19,4 +19,4 @@ jobs:
     secrets: inherit
     with:
       dockerfile-path: "Doppler.EasyNetQ.HosepipeWorker/Dockerfile"
-      dockerhub-image-name: "doppler-easynetq-hosepipeworker"
+      docker-image-name: "doppler-easynetq-hosepipeworker"
