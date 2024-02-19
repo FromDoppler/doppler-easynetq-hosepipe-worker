@@ -28,5 +28,7 @@ namespace Doppler.EasyNetQ.HosepipeWorker
         /// </summary>
         /// <remarks>If ConnectionString has defined password parameter, will be replaced with this value if it is not empty.</remarks>
         public string SecretPassword { get; set; }
+
+        public bool EnableLegacyTypeNaming { get; set; }
     }
 }

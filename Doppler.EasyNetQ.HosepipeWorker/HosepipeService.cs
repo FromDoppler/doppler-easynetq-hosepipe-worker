@@ -128,14 +128,7 @@ namespace Doppler.EasyNetQ.HosepipeWorker
                 {
                     _logger.LogWarning("Max retry reached");
 
-                    await _busStation.GetBus(service).Advanced.PublishAsync(
-                        exchange: Exchange.GetDefault(),
-                        routingKey: _hosepipeSettings.UnsolvedErrorQueueName,
-                        mandatory: true,
-                        messageProperties: error.BasicProperties,
-                        body: new JsonSerializer().MessageToBytes(typeof(Error), error));
-
-                    _logger.LogInformation("Error published to {QueueName}", _hosepipeSettings.UnsolvedErrorQueueName);
+                    await PublishErrorToUnsolvedQueue(service, error);
 
                     return;
                 }
@@ -154,14 +147,7 @@ namespace Doppler.EasyNetQ.HosepipeWorker
                 {
                     _logger.LogError(ex, "Unexpected problem publishing message to the original queue");
 
-                    await _busStation.GetBus(service).Advanced.PublishAsync(
-                        exchange: Exchange.GetDefault(),
-                        routingKey: _hosepipeSettings.UnsolvedErrorQueueName,
-                        mandatory: true,
-                        messageProperties: error.BasicProperties,
-                        body: new JsonSerializer().MessageToBytes(typeof(Error), error));
-
-                    _logger.LogInformation("Error published to {QueueName}", _hosepipeSettings.UnsolvedErrorQueueName);
+                    await PublishErrorToUnsolvedQueue(service, error);
                 }
                 catch (Exception republishErrorException)
                 {
@@ -171,6 +157,20 @@ namespace Doppler.EasyNetQ.HosepipeWorker
                         error);
                 }
             }
+        }
+
+        private async Task PublishErrorToUnsolvedQueue(string service, Error error)
+        {
+            error.BasicProperties.Headers[_hosepipeSettings.RetryCountHeader] = 0;
+
+            await _busStation.GetBus(service).Advanced.PublishAsync(
+                exchange: Exchange.GetDefault(),
+                routingKey: _hosepipeSettings.UnsolvedErrorQueueName,
+                mandatory: true,
+                messageProperties: error.BasicProperties,
+                body: new JsonSerializer().MessageToBytes(typeof(Error), error));
+
+            _logger.LogInformation("Error published to {QueueName}", _hosepipeSettings.UnsolvedErrorQueueName);
         }
     }
 }
