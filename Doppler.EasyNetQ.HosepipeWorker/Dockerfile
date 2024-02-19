@@ -1,19 +1,21 @@
-#See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
+#See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
 FROM mcr.microsoft.com/dotnet/runtime:8.0 AS base
+USER app
 WORKDIR /app
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["Doppler.EasyNetQ.HosepipeWorker/Doppler.EasyNetQ.HosepipeWorker.csproj", "Doppler.EasyNetQ.HosepipeWorker/"]
-COPY ["Doppler.Extensions.Logging/Doppler.Extensions.Logging.csproj", "Doppler.Extensions.Logging/"]
-RUN dotnet restore "Doppler.EasyNetQ.HosepipeWorker/Doppler.EasyNetQ.HosepipeWorker.csproj"
+RUN dotnet restore "./Doppler.EasyNetQ.HosepipeWorker/Doppler.EasyNetQ.HosepipeWorker.csproj"
 COPY . .
 WORKDIR "/src/Doppler.EasyNetQ.HosepipeWorker"
-RUN dotnet build "Doppler.EasyNetQ.HosepipeWorker.csproj" -c Release -o /app/build
+RUN dotnet build "./Doppler.EasyNetQ.HosepipeWorker.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "Doppler.EasyNetQ.HosepipeWorker.csproj" -c Release -o /app/publish
+ARG BUILD_CONFIGURATION=Release
+RUN dotnet publish "./Doppler.EasyNetQ.HosepipeWorker.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
