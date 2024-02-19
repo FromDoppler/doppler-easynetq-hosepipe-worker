@@ -25,7 +25,11 @@ namespace Doppler.EasyNetQ.HosepipeWorker
                     {
                         connectionConfiguration.Password = connection.Value.SecretPassword;
                     }
-                    var bus = RabbitHutch.CreateBus(connectionConfiguration, x => { });
+                    var bus = RabbitHutch.CreateBus(connectionConfiguration, x =>
+                    {
+                        if (connection.Value.EnableLegacyTypeNaming)
+                            x.EnableLegacyTypeNaming();
+                    });
 
                     bus.Advanced.QueueDeclare(options.Value.ErrorQueueName);
                     bus.Advanced.QueueDeclare(options.Value.UnsolvedErrorQueueName);
