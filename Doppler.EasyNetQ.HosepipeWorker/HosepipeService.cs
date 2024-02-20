@@ -164,11 +164,10 @@ namespace Doppler.EasyNetQ.HosepipeWorker
             error.BasicProperties.Headers[_hosepipeSettings.RetryCountHeader] = 0;
 
             await _busStation.GetBus(service).Advanced.PublishAsync(
-                exchange: Exchange.GetDefault(),
+                exchange: Exchange.Default,
                 routingKey: _hosepipeSettings.UnsolvedErrorQueueName,
                 mandatory: true,
-                messageProperties: error.BasicProperties,
-                body: new JsonSerializer().MessageToBytes(typeof(Error), error));
+                message: new Message<Error>(error));
 
             _logger.LogInformation("Error published to {QueueName}", _hosepipeSettings.UnsolvedErrorQueueName);
         }
