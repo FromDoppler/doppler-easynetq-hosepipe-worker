@@ -6,6 +6,7 @@ WORKDIR /app
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
+ARG FROMDOPPLER_GITHUB_PACKAGES_TOKEN
 WORKDIR /src
 COPY ["nuget.config", "."]
 COPY ["Doppler.EasyNetQ.HosepipeWorker/Doppler.EasyNetQ.HosepipeWorker.csproj", "Doppler.EasyNetQ.HosepipeWorker/"]
