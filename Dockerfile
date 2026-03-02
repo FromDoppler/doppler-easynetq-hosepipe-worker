@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:9.0.311 AS restore
+FROM mcr.microsoft.com/dotnet/sdk:10.0.103 AS restore
 WORKDIR .
 
 COPY ./*.sln ./
